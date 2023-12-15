@@ -1,0 +1,7 @@
+{
+  "name": "culqi-ionic-test",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
