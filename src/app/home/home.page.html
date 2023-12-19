@@ -1,20 +1,22 @@
-<ion-header [translucent]="true">
+<!-- Encabezado de la página con una barra de herramientas -->
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <!-- Título en la barra de herramientas -->
+    <ion-title>Ionic Culqi</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<!-- Contenido de la página con un relleno interior -->
+<ion-content padding>
+  <!-- Lista de elementos, en este caso, un solo elemento de entrada de ion-item -->
+  <ion-list>
+    <ion-item>
+      <!-- Entrada de número vinculada a la variable 'monto' mediante ngModel -->
+      <ion-input label="Monto" type="number" [(ngModel)]="monto" placeholder="S/. 50"></ion-input>
+      <!-- Se puede agregar un comentario explicativo aquí si es necesario -->
+    </ion-item>
+  </ion-list>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <!-- Botón para realizar el pago, con un evento de clic vinculado a la función 'openCheckout()' -->
+  <ion-button block (click)="openCheckout()">Pagar</ion-button>
 </ion-content>
