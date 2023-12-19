@@ -14,7 +14,7 @@ export class CulqiService {
     title: '',
     currency: '',
     description: '',
-    amount: 0
+    amount: 0,
   };
 
   // Creamos un Subject de RxJS para emitir eventos relacionados con el pago
@@ -23,43 +23,55 @@ export class CulqiService {
   // Constructor del servicio, que recibe el módulo HttpClient para hacer solicitudes HTTP
   constructor(private http: HttpClient) {
     // Agregamos un event listener para el evento 'payment_event'
-    document.addEventListener('payment_event', (token: any) => {
-      // Obtenemos el token del detalle del evento
-      const token_id = token.detail;
-      // URL para realizar la carga (charge) utilizando la API de Culqi
-      const url = 'https://api.culqi.com/v2/charges';
+    document.addEventListener(
+      'payment_event',
+      (token: any) => {
+        // Obtenemos el token del detalle del evento
+        const token_id = token.detail;
+        // URL para realizar la carga (charge) utilizando la API de Culqi
+        const url = 'https://api.culqi.com/v2/charges';
 
-      // Emitimos un evento indicando que se está cargando el pago
-      this.paymentSubject.next('on_event_loading_pago');
+        // Emitimos un evento indicando que se está cargando el pago
+        this.paymentSubject.next('on_event_loading_pago');
 
-      // Configuramos los encabezados de la solicitud HTTP
-      const headers = new HttpHeaders()
-        .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer sk_test_a28718d55afad746');
+        // Configuramos los encabezados de la solicitud HTTP
+        const headers = new HttpHeaders()
+          .set('Content-Type', 'application/json')
+          .set('Authorization', 'Bearer sk_test_a28718d55afad746');
 
-      // Creamos el cuerpo de la solicitud en formato JSON
-      const body = JSON.stringify({
-        amount: this.settings.amount,
-        description: 'ejemplo',
-        currency_code: 'PEN',
-        email: 'developer.williamstoro@gmail.com',
-        source_id: token_id
-      });
+        // Creamos el cuerpo de la solicitud en formato JSON
+        const body = JSON.stringify({
+          amount: this.settings.amount,
+          description: 'ejemplo',
+          currency_code: 'PEN',
+          email: 'developer.williamstoro@gmail.com',
+          source_id: token_id,
+        });
 
-      // Realizamos la solicitud POST al servidor de Culqi
-      this.http.post(url, body, { headers }).subscribe(
-        // Manejamos la respuesta exitosa del servidor
-        (response: any) => {
-          // Emitimos un evento indicando que el pago fue exitoso
-          this.paymentSubject.next({ event: 'on_event_pago', data: response });
-        },
-        // Manejamos los errores de la solicitud
-        (error: any) => {
-          // Emitimos un evento indicando que hubo un error en el pago
-          this.paymentSubject.next({ event: 'on_event_pago_error', data: error });
-        }
-      );
-    }, false);
+        // Realizamos la solicitud POST al servidor de Culqi
+        this.http.post(url, body, { headers }).subscribe(
+          // Manejamos la respuesta exitosa del servidor
+          (response: any) => {
+            // Emitimos un evento indicando que el pago fue exitoso
+            this.paymentSubject.next({
+              event: 'on_event_pago',
+              data: response,
+            });
+            // Cerramos la pasarela de pagos
+            Culqi.close();
+          },
+          // Manejamos los errores de la solicitud
+          (error: any) => {
+            // Emitimos un evento indicando que hubo un error en el pago
+            this.paymentSubject.next({
+              event: 'on_event_pago_error',
+              data: error,
+            });
+          }
+        );
+      },
+      false
+    );
   }
 
   // Método para obtener un Observable que permite suscribirse a eventos de pago
@@ -84,7 +96,28 @@ export class CulqiService {
       currency: 'PEN',
       description: descripcion,
       amount: cantidad,
-      order: 'ord_live_0CjjdWhFpEAZlxlz'
+      order: 'ord_live_0CjjdWhFpEAZlxlz',
+    });
+
+    Culqi.options({
+      lang: 'auto',
+      modal: true,
+      installments: false, // Habilitar o deshabilitar el campo de cuotas
+      customButton: 'Pagar con Culqi',
+      paymentMethods: {
+        tarjeta: true,
+        yape: true,
+        //bancaMovil: true,
+        //agente: true,
+        //billetera: true,
+        //cuotealo: true,
+      },
+      style: {
+        maincolor: '#fbcf19',
+        buttontext: '#ffffff',
+        maintext: '#4A4A4A',
+        desctext: '#4A4A4A',
+      },
     });
   }
 
